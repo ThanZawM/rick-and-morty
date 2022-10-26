@@ -1,11 +1,11 @@
 <template>
   <div class="home mt-10">
-    <h1 class="my-5">Rick And Morty</h1>
+    <h1  class="mt-5 mb-10 header">Rick And Morty</h1>
 
     <!-- <SearchVue /> -->
     <!-- For search container -->
     <div class="search-container">
-      <h2>Are you looking for a character?</h2>
+      <h2 class="search-title">Are you looking for a character?</h2>
       <v-form>
         <v-container>
           <v-row align="center" justify="center">
@@ -23,7 +23,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" v-if="showClear">
-              <v-btn class="text-uppercase" dark @click="clearSearch">clear search</v-btn>
+              <v-btn color="#243e54" class="white--text text-uppercase mb-5" x-large dark outlined @click="clearSearch">clear search</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -95,4 +95,22 @@ export default {
 </script>
 
 <style scoped>
+.header{
+  font-size: 80px;
+  font-weight: 400;
+    color:#02b1c8;
+    text-align: center;
+    text-shadow: 1px 1px 1px #111;
+    font-family: "Schoolbell",serif;
+}
+.search-title{
+  font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    color: #fff765;
+    margin-bottom: 15px;
+}
+.v-btn:hover{
+  background: #00b4cc;
+}
 </style>
