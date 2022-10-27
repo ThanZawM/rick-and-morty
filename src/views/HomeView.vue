@@ -1,6 +1,6 @@
 <template>
   <div class="home mt-10">
-    <h1  class="mt-5 mb-10 header">Rick And Morty</h1>
+    <h1 class="mt-5 mb-10 header">Rick And Morty</h1>
 
     <!-- <SearchVue /> -->
     <!-- For search container -->
@@ -14,16 +14,27 @@
                 solo
                 placeholder="Write your name"
                 v-model="inputName"
-                @keyup.enter="filterSearch(inputName)"
+                @keyup.enter="filterSearch(inputName, false)"
               ></v-text-field>
               <v-btn icon>
-                <v-icon color="orange" @click="filterSearch(inputName)">{{
-                  mdiMagnify
-                }}</v-icon>
+                <v-icon
+                  color="orange"
+                  @click="filterSearch(inputName, false)"
+                  >{{ mdiMagnify }}</v-icon
+                >
               </v-btn>
             </v-col>
             <v-col cols="12" v-if="showClear">
-              <v-btn color="#243e54" class="white--text text-uppercase mb-5" x-large dark outlined @click="clearSearch">clear search</v-btn>
+              <v-btn
+                color="#243e54"
+                class="white--text text-uppercase mb-5"
+                x-large
+                dark
+                outlined
+                @click="clearSearch"
+              >
+                clear search</v-btn
+              >
             </v-col>
           </v-row>
         </v-container>
@@ -32,12 +43,29 @@
 
     <div class="card-container">
       <v-row align="center" no-gutters>
-        <v-col cols="3" v-for="item in allData" :key="item.id">
-          <router-link :to="{ name: 'details', params: { id: item.id } }">
-            <HomeCard :obj="item" />
-          </router-link>
+        <v-col
+          cols="12"
+          lg="3"
+          md="4"
+          sm="6"
+          v-for="item in allData"
+          :key="item.id"
+        >
+          <HomeCard :obj="item" />
         </v-col>
       </v-row>
+    </div>
+
+    <div class="text-center">
+      <v-pagination
+        v-model="currPage"
+        :length="totalPages"
+        circle
+        :total-visible="7"
+        :value="currPage"
+        :prev-icon="mdiChevronDoubleLeft"
+        :next-icon="mdiChevronDoubleRight"
+      ></v-pagination>
     </div>
   </div>
 </template>
@@ -46,71 +74,112 @@
 // @ is an alias to /src
 import HomeCard from "@/components/HomeCard.vue";
 import axios from "axios";
-import { mdiAccount, mdiMagnify } from "@mdi/js";
+import {
+  mdiMagnify,
+  mdiChevronDoubleLeft,
+  mdiChevronDoubleRight,
+} from "@mdi/js";
 
 export default {
   name: "HomeView",
   components: { HomeCard },
   data: () => ({
     allData: null,
-    mdiAccount: mdiAccount,
+    searchData: null,
     mdiMagnify: mdiMagnify,
     showClear: false,
     inputName: "",
+    currPage: 1,
+    totalPages: 42,
+    mdiChevronDoubleLeft: mdiChevronDoubleLeft,
+    mdiChevronDoubleRight: mdiChevronDoubleRight,
   }),
   mounted() {
-    this.getData();
+    let self = this;
+    self.getData(self.currPage);
   },
+  watch: {
+    currPage() {
+      let self = this;
+      if (self.inputName) {
+        self.filterSearch(self.inputName, true);
+      } else {
+        self.getData(self.currPage);
+      }
+    },
+  },
+  // updated() {
+  //   let self = this;
+  //   self.getData(self.currPage);
+  // },
   methods: {
-    getData() {
+    getData(pageNO) {
+      let self = this;
       axios
-        .get("https://rickandmortyapi.com/api/character")
+        .get("https://rickandmortyapi.com/api/character?page=" + pageNO)
         .then((response) => {
-          this.allData = response.data.results;
-
-          // console.log(this.allData);
+          self.allData = response.data.results;
+          self.totalPages = response.data.info.pages;
         })
         .catch((error) => {
           alert(error);
         });
     },
 
-    filterSearch(input) {
-      this.showClear = true;
+    filterSearch(input, isPagination) {
+      let self = this;
+      self.showClear = true;
+      if (!isPagination) self.currPage = 1;
+      axios
+        .get(
+          "https://rickandmortyapi.com/api/character?page=" +
+            self.currPage +
+            "&name=" +
+            input
+        )
+        .then((response) => {
+          self.allData = response.data.results;
+          self.totalPages = response.data.info.pages;
+        })
+        .catch((error) => {
+          alert(error);
+        });
 
-      var filter = this.allData.filter((el) =>
-        el.name.toLowerCase().includes(input.toLowerCase())
-      );
-      console.log(filter);
-      this.allData = filter;
+      // let filter = self.allData.filter((el) =>
+      //   el.name.toLowerCase().includes(input.toLowerCase())
+      // );
+      // self.allData = filter;
     },
 
     clearSearch() {
-      this.inputName = ''
-      this.getData()
-      this.showClear = false
-    }
+      let self = this;
+      self.inputName = "";
+      self.getData(self.currPage);
+      self.showClear = false;
+    },
   },
 };
 </script>
 
 <style scoped>
-.header{
+.header {
   font-size: 80px;
   font-weight: 400;
-    color:#02b1c8;
-    text-align: center;
-    text-shadow: 1px 1px 1px #111;
-    font-family: "Schoolbell",serif;
+  color: #02b1c8;
+  text-align: center;
+  text-shadow: 1px 1px 1px #111;
+  font-family: "Schoolbell", serif;
 }
-.search-title{
+
+.search-title {
   font-size: 22px;
-    font-weight: 900;
-    text-align: center;
-    color: #fff765;
-    margin-bottom: 15px;
+  font-weight: 900;
+  text-align: center;
+  color: #fff765;
+  margin-bottom: 15px;
 }
-.v-btn:hover{
+
+.v-btn:hover {
   background: #00b4cc;
 }
 </style>
